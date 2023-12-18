@@ -7,6 +7,7 @@ public class gameField : MonoBehaviour
     public static gameField instance;
     public gameBlock[][] blocks;
     public Vector2Int size;
+    public Material[] colors;
 
     [SerializeField]
     GameObject blockObj;
@@ -16,60 +17,66 @@ public class gameField : MonoBehaviour
         instance = this;
     }
 
-    void Start()
+    public void init()
     {
         blocks = new gameBlock[size.x][];
         for (int x = 0; x < blocks.Length; x++)
             blocks[x] = new gameBlock[size.x];
-        makeBlock(new Vector2Int(0, 0));
-        makeBlock(new Vector2Int(3, 0));
 
-        makeBlock(new Vector2Int(3, 1));
+        for (int x = 0; x < size.x; x++)
+        {
+            makeBlock(-1, new Vector2Int(x, 0));
+            makeBlock(-1, new Vector2Int(x, size.x - 1));
+        }
+        for (int y = 1; y < size.x - 1; y++)
+        {
+            makeBlock(-1, new Vector2Int(0, y));
+            makeBlock(-1, new Vector2Int(size.x - 1, y));
+        }
+        makeBlock(-1, new Vector2Int(2, 3));
 
-        makeBlock(new Vector2Int(2, 0));
-        makeBlock(new Vector2Int(2, 2));
     }
 
-    void makeBlock(Vector2Int pos)
+    public void makeBlock(int number, Vector2Int pos)
     {
         blocks[pos.x][pos.y] = Instantiate(blockObj, (Vector2)pos, Quaternion.identity)
             .GetComponent<gameBlock>();
-        blocks[pos.x][pos.y].init(2, pos);
+        blocks[pos.x][pos.y].init(number, pos);
     }
 
     public void moveBlock(int dir)
     {
-        dispBlock();
         switch (dir)
         {
-            case 0: //rigtht
+            case -1: //right
                 for (int x = 0; x < blocks.Length; x++)
                     for (int y = 0; y < blocks[x].Length; y++)
-                        if (blocks[x][y] == null)
-                            continue;
-                        else
-                            moveBlockSub(new Vector2Int(x, y), -Vector2Int.right);
+                        moveBlockSub(new Vector2Int(x, y), -Vector2Int.right);
                 break;
-            case 1: //up
+            case 2: //up
+                for (int y = blocks.Length - 1; y >= 0; y--)
+                    for (int x = 0; x < blocks[y].Length; x++)
+                        moveBlockSub(new Vector2Int(x, y), Vector2Int.up);
                 break;
-            case 2: //left
+            case 1: //left
                 for (int x = blocks.Length - 1; x >= 0; x--)
                     for (int y = 0; y < blocks[x].Length; y++)
-                        if (blocks[x][y] == null)
-                            continue;
-                        else
-                            moveBlockSub(new Vector2Int(x, y), Vector2Int.right);
+                        moveBlockSub(new Vector2Int(x, y), Vector2Int.right);
                 break;
-            case 3: //down
+            case -2: //down
+                for (int y = 0; y < blocks.Length; y++)
+                    for (int x = 0; x < blocks[y].Length; x++)
+                        moveBlockSub(new Vector2Int(x, y), -Vector2Int.up);
                 break;
             default:
                 break;
         }
-        dispBlock();
     }
 
     public void moveBlockSub(Vector2Int pos, Vector2Int dir)
     {
+        if (blocks[pos.x][pos.y] == null || blocks[pos.x][pos.y].getNum == -1)
+            return;
         var curBlock = blocks[pos.x][pos.y];
         Vector2Int newPos = curBlock.move(dir);
         if (newPos != pos)
@@ -78,6 +85,21 @@ public class gameField : MonoBehaviour
             blocks[pos.x][pos.y] = null;
         }
         return;
+    }
+
+    public void deleteBlock(Vector2Int pos)
+    {
+        blocks[pos.x][pos.y].dest();
+    }
+
+    public TStuck<Vector2Int> getEmpty()
+    {
+        TStuck<Vector2Int> result = new TStuck<Vector2Int>();
+        for (int x = 0; x < blocks.Length; x++)
+            for (int y = 0; y < blocks[x].Length; y++)
+                if (blocks[x][y] == null)
+                    result.push(new Vector2Int(x, y));
+        return result;
     }
 
     public int getBlock(Vector2Int pos)
