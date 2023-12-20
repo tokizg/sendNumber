@@ -9,9 +9,16 @@ public class gameBlock : MonoBehaviour
     [SerializeField]
     int Number;
     SpriteRenderer spr;
+
+    [SerializeField]
+    int Age = 0;
     public int getNum
     {
         get { return Number; }
+    }
+    public int getAge
+    {
+        get { return Age; }
     }
     public Vector2Int Position;
 
@@ -20,40 +27,44 @@ public class gameBlock : MonoBehaviour
 
     public void init(int n, Vector2Int p)
     {
+        if (spr == null)
+            spr = GetComponent<SpriteRenderer>();
+
         Number = n;
         Position = p;
+        Age = 0;
+
+        color = n;
+        if (Number < 0)
+            this.spr.material = gameField.instance.colors[0];
+        else
+            this.spr.material = gameField.instance.colors[
+                (n >= gameField.instance.colors.Length) ? gameField.instance.colors.Length - 1 : n
+            ];
+    }
+
+    public void addAge()
+    {
+        Age++;
     }
 
     // Start is called before the first frame update
-    void Start()
-    {
-        spr = GetComponent<SpriteRenderer>();
-        if (Number == -1)
-            this.spr.material = gameField.instance.colors[0];
-        else
-            this.spr.material = gameField.instance.colors[color];
-    }
+    void Start() { }
 
     public Vector2Int move(Vector2Int dir)
     {
         Vector2Int futurePos = Position + dir;
         if (!gameField.instance.isInside(futurePos))
             return Position;
-        int futBlNum = gameField.instance.getBlock(futurePos);
-        if (futBlNum == 0)
+        gameBlock futBlNum = gameField.instance.getBlock(futurePos);
+        if (futBlNum == null)
         {
             Position = futurePos;
             move(dir);
         }
-        else if (futBlNum == this.Number)
+        else if (futBlNum.getNum == this.Number && futBlNum.getAge > 0)
         {
-            this.Number *= 2;
-            color++;
-            this.spr.material = gameField.instance.colors[
-                (color < gameField.instance.colors.Length)
-                    ? color
-                    : gameField.instance.colors.Length - 1
-            ];
+            init(Number + 1, Position);
             gameField.instance.deleteBlock(futurePos);
             Position = futurePos;
         }
@@ -73,7 +84,9 @@ public class gameBlock : MonoBehaviour
 
     void Update()
     {
-        text.text = Number.ToString();
+        text.text = Mathf.Pow(2, Number).ToString();
+        transform.position = (Vector2)Position;
+        /*
         if (
             Time.time - lerpStarted < distance
             && (Vector2)transform.position - (Vector2)Position != Vector2.zero
@@ -93,5 +106,6 @@ public class gameBlock : MonoBehaviour
             lerpStarted = Time.time;
             distance = ((Vector2)transform.position - (Vector2)Position).magnitude;
         }
+        */
     }
 }

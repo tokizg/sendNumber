@@ -4,7 +4,11 @@ using UnityEngine;
 
 public class game : MonoBehaviour
 {
+    [SerializeField]
+    int minAppNum = 1;
 
+    [SerializeField]
+    int maxAppNum = 2;
 
     void Start()
     {
@@ -19,7 +23,6 @@ public class game : MonoBehaviour
         int x_ipt = (int)Input.GetAxisRaw("Horizontal"),
             y_ipt = (int)Input.GetAxisRaw("Vertical"),
             dir = 0;
-
         if (Input.GetButtonDown("Horizontal"))
             dir = 1 * x_ipt;
         else if (Input.GetButtonDown("Vertical"))
@@ -28,7 +31,11 @@ public class game : MonoBehaviour
             gameField.instance.moveBlock(dir);
         else
             return;
-        makeRandomBlock();
+        if (gameField.instance.isMoved)
+        {
+            gameField.instance.turnEnd();
+            makeRandomBlock();
+        }
     }
 
     void makeRandomBlock()
@@ -38,9 +45,11 @@ public class game : MonoBehaviour
         stuck = gameField.instance.getEmpty();
         if (stuck.Length > 0)
         {
-            int r = Random.Range(0, stuck.Length);
+            int r = Random.Range(0, stuck.Length),
+                n = 1;
             newBlPos = stuck.get(r);
-            gameField.instance.makeBlock(2, newBlPos);
+
+            gameField.instance.makeBlock(n, newBlPos);
         }
     }
 }
