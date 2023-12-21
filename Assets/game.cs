@@ -2,19 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class game : MonoBehaviour
+public class game : MonoBehaviour 
 {
-    [SerializeField]
-    int minAppNum = 1;
 
+    public static game instance;
+
+    void Awake()
+    {
+        instance = this;
+    }
+    
     [SerializeField]
-    int maxAppNum = 2;
+    int score = 0;
 
     void Start()
     {
         gameField.instance.init();
         makeRandomBlock();
         makeRandomBlock();
+        goal(0);
     }
 
     // Update is called once per frame
@@ -51,6 +57,12 @@ public class game : MonoBehaviour
 
             gameField.instance.makeBlock(n, newBlPos);
         }
+    }
+
+    public void goal(int n)
+    {
+        score += n;
+        gameField.instance.makeGoal();
     }
 }
 

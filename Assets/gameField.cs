@@ -54,7 +54,7 @@ public class gameField : MonoBehaviour
 
     public void makeGoal()
     {
-        ReplaceBlock(Random.Range(-1,-11), new Vector2Int(3, 6));
+        ReplaceBlock(Random.Range(-1, -7), new Vector2Int(3, 6));
     }
 
     public void turnEnd()
@@ -105,7 +105,7 @@ public class gameField : MonoBehaviour
 
     public void moveBlockSub(Vector2Int pos, Vector2Int dir)
     {
-        if (blocks[pos.x][pos.y] == null || blocks[pos.x][pos.y].getNum == -1)
+        if (blocks[pos.x][pos.y] == null || blocks[pos.x][pos.y].getNum <0)
             return;
         var curBlock = blocks[pos.x][pos.y];
         Vector2Int newPos = curBlock.move(dir);
@@ -115,6 +115,10 @@ public class gameField : MonoBehaviour
             blocks[pos.x][pos.y] = null;
             if (!moved)
                 moved = true;
+        }
+        if (newPos == new Vector2Int(3, 6))
+        {
+            game.instance.goal(curBlock.getNum);
         }
         return;
     }

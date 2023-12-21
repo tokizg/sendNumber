@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class gameBlock : MonoBehaviour
 {
@@ -23,7 +24,7 @@ public class gameBlock : MonoBehaviour
     public Vector2Int Position;
 
     [SerializeField]
-    TextMesh text;
+    TextMeshPro text;
 
     public void init(int n, Vector2Int p)
     {
@@ -38,9 +39,14 @@ public class gameBlock : MonoBehaviour
         if (Number < 0)
             this.spr.material = gameField.instance.colors[0];
         else
+        {
             this.spr.material = gameField.instance.colors[
                 (n >= gameField.instance.colors.Length) ? gameField.instance.colors.Length - 1 : n
             ];
+            text.color = gameField.instance.colors[
+                (n >= gameField.instance.colors.Length) ? gameField.instance.colors.Length - 1 : n
+            ].color;
+        }
     }
 
     public void addAge()
@@ -68,6 +74,11 @@ public class gameBlock : MonoBehaviour
             gameField.instance.deleteBlock(futurePos);
             Position = futurePos;
         }
+        else if (futBlNum.getNum == -this.Number)
+        {
+            gameField.instance.deleteBlock(futurePos);
+            Position = futurePos;
+        }
 
         return Position;
     }
@@ -84,7 +95,14 @@ public class gameBlock : MonoBehaviour
 
     void Update()
     {
-        text.text = Mathf.Pow(2, Number).ToString();
+        int n = Number;
+        if (n < 0) n = -n;
+        string SpriteText = Mathf.Pow(2, n).ToString();
+        text.text = "";
+        for (int i = 0; i <= SpriteText.Length - 1; i++)
+        {
+            text.text += "<sprite=" + SpriteText[i] + ">";
+        }
         transform.position = (Vector2)Position;
         /*
         if (
