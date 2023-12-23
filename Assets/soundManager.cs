@@ -12,6 +12,9 @@ public class soundManager : MonoBehaviour
     [SerializeField]
     AudioClip goalSound;
 
+    [SerializeField]
+    AudioClip getSound;
+
     void Awake()
     {
         inst = this;
@@ -26,5 +29,9 @@ public class soundManager : MonoBehaviour
     public void ad_goal()
     {
         ac.PlayOneShot(goalSound);
+    }
+    public void ad_getItem()
+    {
+        ac.PlayOneShot(getSound);
     }
 }

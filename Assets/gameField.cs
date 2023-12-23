@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class gameField : MonoBehaviour
 {
+
+
     public static gameField inst;
     public gameBlock[][] blocks;
     public Vector2Int size;
@@ -42,13 +44,13 @@ public class gameField : MonoBehaviour
             blocks[x] = new gameBlock[size.x];
         for (int x = 0; x < size.x; x++)
         {
-            makeBlock(-12, new Vector2Int(x, 0));
-            makeBlock(-12, new Vector2Int(x, size.x - 1));
+            makeBlock(0, new Vector2Int(x, 0),blockType.wall,game.inst.LFT_INFINITY);
+            makeBlock(0, new Vector2Int(x, size.x - 1),blockType.wall,game.inst.LFT_INFINITY);
         }
         for (int y = 1; y < size.x - 1; y++)
         {
-            makeBlock(-12, new Vector2Int(0, y));
-            makeBlock(-12, new Vector2Int(size.x - 1, y));
+            makeBlock(0, new Vector2Int(0, y),blockType.wall,game.inst.LFT_INFINITY);
+            makeBlock(0, new Vector2Int(size.x - 1, y),blockType.wall,game.inst.LFT_INFINITY);
         }
         /*
         makeBlock(5, new Vector2Int(1, 3));
@@ -61,7 +63,7 @@ public class gameField : MonoBehaviour
 
     public void makeGoal()
     {
-        ReplaceBlock(Random.Range(-1, -7), goalPos);
+        ReplaceBlock(Random.Range(1, 7), goalPos,blockType.goal,game.inst.LFT_INFINITY);
     }
 
     public void turnEnd()
@@ -74,11 +76,11 @@ public class gameField : MonoBehaviour
         goaled = false;
     }
 
-    public void makeBlock(int number, Vector2Int pos)
+    public void makeBlock(int number, Vector2Int pos,blockType tp,int lft)
     {
         blocks[pos.x][pos.y] = Instantiate(blockObj, (Vector2)pos, Quaternion.identity)
             .GetComponent<gameBlock>();
-        blocks[pos.x][pos.y].init(number, pos);
+        blocks[pos.x][pos.y].init(number, pos,tp,lft);
         blocks[pos.x][pos.y].addAge();
     }
 
@@ -121,7 +123,7 @@ public class gameField : MonoBehaviour
 
     public void moveBlockSub(Vector2Int pos, Vector2Int dir)
     {
-        if (blocks[pos.x][pos.y] == null || blocks[pos.x][pos.y].getNum < 0)
+        if (blocks[pos.x][pos.y] == null || blocks[pos.x][pos.y].getType!=blockType.normal)
             return;
         var curBlock = blocks[pos.x][pos.y];
         Vector2Int newPos = curBlock.move(dir);
@@ -145,10 +147,10 @@ public class gameField : MonoBehaviour
         blocks[pos.x][pos.y].dest();
     }
 
-    public void ReplaceBlock(int n, Vector2Int pos)
+    public void ReplaceBlock(int n, Vector2Int pos,blockType tp,int lft)
     {
         deleteBlock(pos);
-        makeBlock(n, pos);
+        makeBlock(n, pos,tp,lft);
     }
 
     public TStuck<Vector2Int> getEmpty()

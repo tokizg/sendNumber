@@ -3,6 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
+public enum blockType
+{
+    normal,
+    goal,
+    wall,
+    chest
+}
+
 public class gameBlock : MonoBehaviour
 {
     int color = 1;
@@ -10,6 +18,12 @@ public class gameBlock : MonoBehaviour
     [SerializeField]
     int Number;
     SpriteRenderer spr;
+
+    public blockType type;
+    public blockType getType
+    {
+        get { return type; }
+    }
 
     [SerializeField]
     GameObject trail;
@@ -27,24 +41,45 @@ public class gameBlock : MonoBehaviour
     public Vector2Int Position;
 
     [SerializeField]
-    TextMeshPro text;
+    int lifeTime;
 
-    public void init(int n, Vector2Int p)
+    [SerializeField]
+    TextMeshPro numText;
+
+    [SerializeField]
+    TextMeshPro lftText;
+
+    public void init(int n, Vector2Int p, blockType tp, int lft)
     {
         if (spr == null)
             spr = GetComponent<SpriteRenderer>();
+        this.type = tp;
+
+
 
         Number = n;
         Position = p;
         Age = 0;
+        lifeTime = lft;
 
         color = n;
+
         Draw();
     }
 
     public void addAge()
     {
         Age++;
+
+        if (lifeTime != -1)
+        {
+            lifeTime--;
+            if (lifeTime == 0)
+            {
+                gameField.inst.deleteBlock(this.Position);
+            }
+        }
+        Draw();
     }
 
     // Start is called before the first frame update
@@ -55,22 +90,30 @@ public class gameBlock : MonoBehaviour
         Vector2Int futurePos = Position + dir;
         if (!gameField.inst.isInside(futurePos))
             return Position;
-        gameBlock futBlNum = gameField.inst.getBlock(futurePos);
-        if (futBlNum == null)
+        gameBlock futBl = gameField.inst.getBlock(futurePos);
+        if (futBl == null)
         {
             Position = futurePos;
             move(dir);
         }
-        else if (futBlNum.getNum == this.Number && futBlNum.getAge > 0)
+        else if (
+            futBl.getType == blockType.normal && futBl.getNum == this.Number && futBl.getAge > 0
+        )
         {
-            init(Number + 1, Position);
+            init(Number + 1, Position, blockType.normal, game.inst.LFT_INFINITY);
             gameField.inst.deleteBlock(futurePos);
             Position = futurePos;
         }
-        else if (futBlNum.getNum == -this.Number)
+        else if (futBl.getType == blockType.goal && futBl.getNum == this.Number)
         {
             gameField.inst.deleteBlock(futurePos);
             Position = futurePos;
+        }
+        else if (futBl.getType == blockType.chest && futBl.getNum == this.Number)
+        {
+            gameField.inst.deleteBlock(futurePos);
+            Position = futurePos;
+            game.inst.openChest();
         }
         Draw();
         if (futurePos - dir != Position)
@@ -92,20 +135,35 @@ public class gameBlock : MonoBehaviour
     void Draw()
     {
         int n = Number;
-        if (n < 0)
-            n = -n;
         string SpriteText = Mathf.Pow(2, n).ToString();
-        text.text = SPM.convSpr(SpriteText);
-        if (Number < 0)
-            this.spr.material = gameField.inst.colors[0];
+        switch (getType)
+        {
+            case blockType.normal:
+                numText.text = SPM.convSpr(SpriteText);
+                this.spr.material = gameField.inst.colors[0];
+                this.spr.material = gameField.inst.colors[
+                    (n >= gameField.inst.colors.Length) ? gameField.inst.colors.Length - 1 : n
+                ];
+                break;
+            case blockType.goal:
+                numText.text = SPM.convSpr(SpriteText);
+                break;
+            case blockType.chest:
+                spr.sprite = game.inst.blockSpr[4];
+                numText.text = SPM.convSpr(Mathf.Pow(2, n).ToString());
+                this.spr.material = gameField.inst.colors[8];
+                break;
+            default:
+                numText.text = "";
+                break;
+        }
+        if (lifeTime != -1)
+        {
+            lftText.text = SPM.convSpr(lifeTime.ToString());
+        }
         else
         {
-            this.spr.material = gameField.inst.colors[
-                (n >= gameField.inst.colors.Length) ? gameField.inst.colors.Length - 1 : n
-            ];
-            text.color = gameField.inst.colors[
-                (n >= gameField.inst.colors.Length) ? gameField.inst.colors.Length - 1 : n
-            ].color;
+            lftText.text = "";
         }
         transform.position = (Vector2)Position;
         /*

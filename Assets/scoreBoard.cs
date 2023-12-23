@@ -7,7 +7,7 @@ public class scoreBoard : MonoBehaviour
 {
     public static scoreBoard inst;
     [SerializeField]
-    TMP_Text score_text;
+    TextMeshPro score_text;
 
     void Awake()
     {
@@ -16,6 +16,6 @@ public class scoreBoard : MonoBehaviour
 
     public void Draw()
     {
-        score_text.text = SPM.convSpr(game.inst.getScore.ToString());
+        score_text.text = "スコア: "+SPM.convSpr(game.inst.getScore.ToString());
     }
 }
