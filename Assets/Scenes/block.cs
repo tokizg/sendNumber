@@ -25,8 +25,8 @@ public class block : MonoBehaviour
 	{
 		Debug.Log("move"+ dir);
 		Vector2Int futurePos = position + dir;
-		if (!field.instance.isInside(futurePos)) return;
-		int futureBlock = field.instance.getBlock(futurePos);
+		if (!field.inst.isInside(futurePos)) return;
+		int futureBlock = field.inst.getBlock(futurePos);
 		if (futureBlock == 0)
 		{
         	position = futurePos;
@@ -34,8 +34,8 @@ public class block : MonoBehaviour
 		}
 		else if(futureBlock == this.number)
 		{
-			field.instance.mergeBlock(futurePos);
-			field.instance.deleteBlock(this.position);
+			field.inst.mergeBlock(futurePos);
+			field.inst.deleteBlock(this.position);
 			delete();
 		}
 		return;

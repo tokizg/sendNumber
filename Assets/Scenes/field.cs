@@ -1,7 +1,7 @@
 /*using UnityEngine;
 public class field : MonoBehaviour
 {
-    public static field instance;
+    public static field inst;
 
     [SerializeField]
     Vector2Int size;
@@ -23,7 +23,7 @@ public class field : MonoBehaviour
 
     public void Start()
     {
-        instance = this;
+        inst = this;
         blocks = new block[size.x][];
         for (int x = 0; x < blocks.Length; x++)
             blocks[x] = new block[size.y];

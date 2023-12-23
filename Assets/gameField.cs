@@ -4,15 +4,22 @@ using UnityEngine;
 
 public class gameField : MonoBehaviour
 {
-    public static gameField instance;
+    public static gameField inst;
     public gameBlock[][] blocks;
     public Vector2Int size;
+    public Vector2Int goalPos;
     public Material[] colors;
 
+    //ターンごとのフラグ
     bool moved = false;
     public bool isMoved
     {
         get { return moved; }
+    }
+    bool goaled = false;
+    public bool isGoaled
+    {
+        get { return goaled; }
     }
 
     [SerializeField]
@@ -20,7 +27,7 @@ public class gameField : MonoBehaviour
 
     void Awake()
     {
-        instance = this;
+        inst = this;
     }
 
     public bool isInside(Vector2Int pos)
@@ -54,7 +61,7 @@ public class gameField : MonoBehaviour
 
     public void makeGoal()
     {
-        ReplaceBlock(Random.Range(-1, -7), new Vector2Int(3, 6));
+        ReplaceBlock(Random.Range(-1, -7), goalPos);
     }
 
     public void turnEnd()
@@ -64,6 +71,7 @@ public class gameField : MonoBehaviour
                 if (blocks[x][y] != null)
                     blocks[x][y].addAge();
         moved = false;
+        goaled = false;
     }
 
     public void makeBlock(int number, Vector2Int pos)
@@ -101,11 +109,19 @@ public class gameField : MonoBehaviour
             default:
                 break;
         }
+        if (moved)
+        {
+            soundManager.inst.ad_move();
+        }
+        if (isGoaled)
+        {
+            soundManager.inst.ad_goal();
+        }
     }
 
     public void moveBlockSub(Vector2Int pos, Vector2Int dir)
     {
-        if (blocks[pos.x][pos.y] == null || blocks[pos.x][pos.y].getNum <0)
+        if (blocks[pos.x][pos.y] == null || blocks[pos.x][pos.y].getNum < 0)
             return;
         var curBlock = blocks[pos.x][pos.y];
         Vector2Int newPos = curBlock.move(dir);
@@ -116,9 +132,10 @@ public class gameField : MonoBehaviour
             if (!moved)
                 moved = true;
         }
-        if (newPos == new Vector2Int(3, 6))
+        if (newPos == goalPos)
         {
-            game.instance.goal(curBlock.getNum);
+            game.inst.goal(curBlock.getNum);
+            goaled = true;
         }
         return;
     }

@@ -12,6 +12,9 @@ public class gameBlock : MonoBehaviour
     SpriteRenderer spr;
 
     [SerializeField]
+    GameObject trail;
+
+    [SerializeField]
     int Age = 0;
     public int getNum
     {
@@ -36,17 +39,7 @@ public class gameBlock : MonoBehaviour
         Age = 0;
 
         color = n;
-        if (Number < 0)
-            this.spr.material = gameField.instance.colors[0];
-        else
-        {
-            this.spr.material = gameField.instance.colors[
-                (n >= gameField.instance.colors.Length) ? gameField.instance.colors.Length - 1 : n
-            ];
-            text.color = gameField.instance.colors[
-                (n >= gameField.instance.colors.Length) ? gameField.instance.colors.Length - 1 : n
-            ].color;
-        }
+        Draw();
     }
 
     public void addAge()
@@ -60,9 +53,9 @@ public class gameBlock : MonoBehaviour
     public Vector2Int move(Vector2Int dir)
     {
         Vector2Int futurePos = Position + dir;
-        if (!gameField.instance.isInside(futurePos))
+        if (!gameField.inst.isInside(futurePos))
             return Position;
-        gameBlock futBlNum = gameField.instance.getBlock(futurePos);
+        gameBlock futBlNum = gameField.inst.getBlock(futurePos);
         if (futBlNum == null)
         {
             Position = futurePos;
@@ -71,14 +64,17 @@ public class gameBlock : MonoBehaviour
         else if (futBlNum.getNum == this.Number && futBlNum.getAge > 0)
         {
             init(Number + 1, Position);
-            gameField.instance.deleteBlock(futurePos);
+            gameField.inst.deleteBlock(futurePos);
             Position = futurePos;
         }
         else if (futBlNum.getNum == -this.Number)
         {
-            gameField.instance.deleteBlock(futurePos);
+            gameField.inst.deleteBlock(futurePos);
             Position = futurePos;
         }
+        Draw();
+        if (futurePos - dir != Position)
+            DrawTrail(dir);
 
         return Position;
     }
@@ -93,15 +89,23 @@ public class gameBlock : MonoBehaviour
     public float distance;
     public float lerpSpeed = 16f;
 
-    void Update()
+    void Draw()
     {
         int n = Number;
-        if (n < 0) n = -n;
+        if (n < 0)
+            n = -n;
         string SpriteText = Mathf.Pow(2, n).ToString();
-        text.text = "";
-        for (int i = 0; i <= SpriteText.Length - 1; i++)
+        text.text = SPM.convSpr(SpriteText);
+        if (Number < 0)
+            this.spr.material = gameField.inst.colors[0];
+        else
         {
-            text.text += "<sprite=" + SpriteText[i] + ">";
+            this.spr.material = gameField.inst.colors[
+                (n >= gameField.inst.colors.Length) ? gameField.inst.colors.Length - 1 : n
+            ];
+            text.color = gameField.inst.colors[
+                (n >= gameField.inst.colors.Length) ? gameField.inst.colors.Length - 1 : n
+            ].color;
         }
         transform.position = (Vector2)Position;
         /*
@@ -125,5 +129,13 @@ public class gameBlock : MonoBehaviour
             distance = ((Vector2)transform.position - (Vector2)Position).magnitude;
         }
         */
+    }
+
+    public void DrawTrail(Vector2Int dir)
+    {
+        GameObject obj = Instantiate(trail);
+        obj.transform.position = (Vector2)(Position - dir);
+        obj.transform.right = -(Vector2)dir;
+        Destroy(obj, 0.4f);
     }
 }
