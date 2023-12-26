@@ -7,6 +7,7 @@ public enum mode
 {
     play,
     selectPos,
+    selectBlk,
     pause
 };
 
@@ -18,9 +19,9 @@ public class game : MonoBehaviour
 
     public Sprite[] blockSpr;
 
-    public static gameItem[] items = { new blockPlace() };
+    public static gameItem[] items = { new blockPlace(), new blockDest(), new blockStopper(),new restoreGoal() };
     public Sprite[] itemSpr;
-    public string[] descs = { "していした いちに かべを せっちする.\nかべは ３ターンで しょうめつ する" };
+    public string[] descs;
 
     public int selectedSlot;
 
@@ -32,6 +33,9 @@ public class game : MonoBehaviour
     public int maxItemCount;
     public List<int> itemInventory;
     public List<SpriteRenderer> sprrdr;
+
+    [SerializeField]
+    bool gameOver = false;
 
     [SerializeField]
     TextMeshPro itemDesc;
@@ -63,6 +67,11 @@ public class game : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (gameOver) return;
+        Vector3 mousePosition = Input.mousePosition;
+        Vector2 worldPosition =
+            (Vector2)Camera.main.ScreenToWorldPoint(mousePosition) + Vector2.one * 0.5f;
+        var ret = new Vector2Int((int)worldPosition.x, (int)worldPosition.y);
         switch (curMode)
         {
             case mode.play:
@@ -101,18 +110,32 @@ public class game : MonoBehaviour
                     {
                         gameField.inst.turnEnd();
                         makeRandomBlock();
+                        makeRandomBlock();
                     }
                 }
                 break;
             case mode.selectPos:
-                Vector3 mousePosition = Input.mousePosition;
-                Vector2 worldPosition =
-                    (Vector2)Camera.main.ScreenToWorldPoint(mousePosition) + Vector2.one * 0.5f;
-                var ret = new Vector2Int((int)worldPosition.x, (int)worldPosition.y);
                 posSelector.position = (Vector2)ret;
+
                 if (Input.GetMouseButtonDown(0))
                 {
                     if (gameField.inst.isInside(ret) && gameField.inst.blocks[ret.x][ret.y] == null)
+                    {
+                        selectedPosition = ret;
+                        curMode = mode.play;
+                    }
+                }
+                break;
+            case mode.selectBlk:
+                posSelector.position = (Vector2)ret;
+
+                if (Input.GetMouseButtonDown(0))
+                {
+                    if (
+                        gameField.inst.blocks[ret.x][ret.y] != null
+                        && gameField.inst.isInside(ret)
+                        && gameField.inst.blocks[ret.x][ret.y].getType == blockType.normal
+                    )
                     {
                         selectedPosition = ret;
                         curMode = mode.play;
@@ -124,11 +147,16 @@ public class game : MonoBehaviour
         return;
     }
 
+    public void GameOver()
+    {
+        gameOver = true;
+    }
+
     public void openChest()
     {
         if (itemInventory.Count < maxItemCount)
         {
-            itemInventory.Add(Random.Range(0, items.Length - 1));
+            itemInventory.Add(Random.Range(0, items.Length));
             soundManager.inst.ad_getItem();
         }
     }
@@ -145,7 +173,7 @@ public class game : MonoBehaviour
                 n = Random.Range(1, 2);
             newBlPos = stuck.get(r);
 
-            if (k == 19)
+            if (k == 0)
                 gameField.inst.makeBlock(
                     Random.Range(1, 4),
                     newBlPos,

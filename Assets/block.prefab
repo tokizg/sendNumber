@@ -564,6 +564,8 @@ MonoBehaviour:
   Number: 0
   type: 0
   trail: {fileID: 7945085174429573659, guid: 7516461c69d0eda4f83635a50a725c2a, type: 3}
+  effectFagment: {fileID: 3772696234701686267, guid: 22e5b0a8370aaeb469df8f88606a2f22, type: 3}
+  dissapEffect: {fileID: 5360173185425993549, guid: adc1e958cb874ff48b6715436f303be8, type: 3}
   Age: 0
   Position: {x: 0, y: 0}
   lifeTime: 0
@@ -613,7 +615,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 1660931295, guid: d80426a97734f2b4299ed3d251384fb4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

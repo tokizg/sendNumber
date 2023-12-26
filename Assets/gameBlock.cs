@@ -8,7 +8,8 @@ public enum blockType
     normal,
     goal,
     wall,
-    chest
+    chest,
+    stopper
 }
 
 public class gameBlock : MonoBehaviour
@@ -27,6 +28,12 @@ public class gameBlock : MonoBehaviour
 
     [SerializeField]
     GameObject trail;
+
+    [SerializeField]
+    GameObject effectFagment;
+
+    [SerializeField]
+    GameObject dissapEffect;
 
     [SerializeField]
     int Age = 0;
@@ -54,8 +61,6 @@ public class gameBlock : MonoBehaviour
         if (spr == null)
             spr = GetComponent<SpriteRenderer>();
         this.type = tp;
-
-
 
         Number = n;
         Position = p;
@@ -115,6 +120,11 @@ public class gameBlock : MonoBehaviour
             Position = futurePos;
             game.inst.openChest();
         }
+        else if (futBl.getType == blockType.stopper)
+        {
+            gameField.inst.deleteBlock(futurePos);
+            Position = futurePos;
+        }
         Draw();
         if (futurePos - dir != Position)
             DrawTrail(dir);
@@ -124,6 +134,16 @@ public class gameBlock : MonoBehaviour
 
     public void dest()
     {
+        if (this.type == blockType.normal)
+        {
+            GameObject obj = Instantiate(effectFagment, (Vector2)Position, Quaternion.identity);
+            Destroy(obj, 3f);
+        }
+        else if (this.type == blockType.chest)
+        {
+            GameObject obj = Instantiate(dissapEffect, (Vector2)Position, Quaternion.identity);
+            Destroy(obj, 0.45f);
+        }
         Destroy(gameObject);
     }
 
@@ -152,6 +172,9 @@ public class gameBlock : MonoBehaviour
                 spr.sprite = game.inst.blockSpr[4];
                 numText.text = SPM.convSpr(Mathf.Pow(2, n).ToString());
                 this.spr.material = gameField.inst.colors[8];
+                break;
+            case blockType.stopper:
+                spr.sprite = game.inst.blockSpr[5];
                 break;
             default:
                 numText.text = "";
