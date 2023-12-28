@@ -6,16 +6,29 @@ using TMPro;
 public class scoreBoard : MonoBehaviour
 {
     public static scoreBoard inst;
+
     [SerializeField]
-    TextMeshPro score_text;
+    TextMeshPro[] score_text;
+
+    [SerializeField]
+    GameObject overMenu;
+    [SerializeField]
+    TMP_Text scTx;
 
     void Awake()
     {
         inst = this;
     }
 
+    public void Over()
+    {
+        overMenu.SetActive(true);
+        scTx.text = "スコア: " + game.inst.getScore.ToString();
+    }
+
     public void Draw()
     {
-        score_text.text = "スコア: "+SPM.convSpr(game.inst.getScore.ToString());
+        for (int i = 0; i < score_text.Length; i++)
+            score_text[i].text = "スコア: " + SPM.convSpr(game.inst.getScore.ToString());
     }
 }

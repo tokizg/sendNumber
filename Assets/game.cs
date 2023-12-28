@@ -2,13 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
+
 
 public enum mode
 {
     play,
     selectPos,
     selectBlk,
-    pause
+    pause,
+    over
 };
 
 public class game : MonoBehaviour
@@ -19,7 +22,13 @@ public class game : MonoBehaviour
 
     public Sprite[] blockSpr;
 
-    public static gameItem[] items = { new blockPlace(), new blockDest(), new blockStopper(),new restoreGoal() };
+    public static gameItem[] items =
+    {
+        new blockPlace(),
+        new blockDest(),
+        new blockStopper(),
+        new restoreGoal()
+    };
     public Sprite[] itemSpr;
     public string[] descs;
 
@@ -35,7 +44,7 @@ public class game : MonoBehaviour
     public List<SpriteRenderer> sprrdr;
 
     [SerializeField]
-    bool gameOver = false;
+    int turns = 0;
 
     [SerializeField]
     TextMeshPro itemDesc;
@@ -60,14 +69,13 @@ public class game : MonoBehaviour
     {
         gameField.inst.init();
         makeRandomBlock();
-        makeRandomBlock();
         goal(0);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (gameOver) return;
+
         Vector3 mousePosition = Input.mousePosition;
         Vector2 worldPosition =
             (Vector2)Camera.main.ScreenToWorldPoint(mousePosition) + Vector2.one * 0.5f;
@@ -110,7 +118,8 @@ public class game : MonoBehaviour
                     {
                         gameField.inst.turnEnd();
                         makeRandomBlock();
-                        makeRandomBlock();
+                        if (gameField.inst.isGameOver() == true)
+                            GameOver();
                     }
                 }
                 break;
@@ -142,6 +151,10 @@ public class game : MonoBehaviour
                     }
                 }
                 break;
+            case mode.over:
+                if (Input.GetButtonDown("Reset"))
+                    SceneManager.LoadScene(0);
+                break;
         }
         DrawInv();
         return;
@@ -149,7 +162,8 @@ public class game : MonoBehaviour
 
     public void GameOver()
     {
-        gameOver = true;
+        curMode = mode.over;
+        scoreBoard.inst.Over();
     }
 
     public void openChest()
@@ -173,12 +187,12 @@ public class game : MonoBehaviour
                 n = Random.Range(1, 2);
             newBlPos = stuck.get(r);
 
-            if (k == 0)
+            if (k > 15)
                 gameField.inst.makeBlock(
                     Random.Range(1, 4),
                     newBlPos,
                     blockType.chest,
-                    Random.Range(4, 11)
+                    Random.Range(2, 6)
                 );
             else
                 gameField.inst.makeBlock(n, newBlPos, blockType.normal, LFT_INFINITY);
@@ -187,9 +201,12 @@ public class game : MonoBehaviour
 
     public void goal(int n)
     {
-        score += (int)Mathf.Pow(2, n);
+        if (n != -1)
+            score += sc_Power(n);
         gameField.inst.makeGoal();
         scoreBoard.inst.Draw();
+        if (score > sc_Power(gameField.inst.getLevel))
+            gameField.inst.levelUp();
     }
 
     public void DrawInv()
@@ -214,6 +231,20 @@ public class game : MonoBehaviour
                 sprrdr[i].sprite = null;
             i++;
         }
+    }
+
+    int sc_Power(int n)
+    {
+        int ret = sc_PowerSub(n, 1);
+        Debug.Log(ret);
+        return ret;
+    }
+
+    int sc_PowerSub(int n, int x)
+    {
+        if (n == 0)
+            return x;
+        return sc_PowerSub(n - 1, x * ((n % 2 == 0) ? 2 : 3));
     }
 }
 

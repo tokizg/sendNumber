@@ -9,6 +9,21 @@ public class gameField : MonoBehaviour
     public Vector2Int size;
     public Vector2Int goalPos;
     public Material[] colors;
+    int curLevel = 4;
+    public readonly int maxLevel = 11;
+    public int getLevel
+    {
+        get { return curLevel; }
+    }
+
+    public void levelUp()
+    {
+        if (curLevel < maxLevel)
+        {
+            curLevel++;
+            soundManager.inst.ad_levelUp();
+        }
+    }
 
     //ターンごとのフラグ
     bool moved = false;
@@ -50,12 +65,13 @@ public class gameField : MonoBehaviour
             makeBlock(0, new Vector2Int(0, y), blockType.wall, game.inst.LFT_INFINITY);
             makeBlock(0, new Vector2Int(size.x - 1, y), blockType.wall, game.inst.LFT_INFINITY);
         }
+
         makeGoal();
     }
 
     public void makeGoal()
     {
-        ReplaceBlock(Random.Range(1, 7), goalPos, blockType.goal, game.inst.LFT_INFINITY);
+        ReplaceBlock(Random.Range(1, curLevel), goalPos, blockType.goal, game.inst.LFT_INFINITY);
     }
 
     public void turnEnd()
@@ -65,9 +81,6 @@ public class gameField : MonoBehaviour
                 if (blocks[x][y] != null)
                     blocks[x][y].addAge();
         moved = false;
-        goaled = false;
-        if (isGameOver())
-            game.inst.GameOver();
     }
 
     public void makeBlock(int number, Vector2Int pos, blockType tp, int lft)
@@ -78,39 +91,37 @@ public class gameField : MonoBehaviour
         blocks[pos.x][pos.y].addAge();
     }
 
-    bool isGameOver()
+    public bool isGameOver()
     {
-        for (int x = 1; x < blocks.Length; x++)
-            for (int y = 1; y < blocks[x].Length; y++)
-                if (isGameOverSub(new Vector2Int(x, y)))
+        var empties = getEmpty();
+        Debug.Log(empties.Length);
+        if (empties.Length > 0)
+            return false;
+        Debug.Log("theres no empty");
+        for (int x = 1; x < blocks.Length - 1; x++)
+            for (int y = 1; y < blocks[x].Length - 1; y++)
+            {
+                if (blocks[x][y].getType == blockType.normal)
                 {
-                    Debug.Log("not GameOver!");
-
-                    return false;
+                    if (canMove(x, y, x - 1, y) == true)
+                        return false;
+                    if (canMove(x, y, x + 1, y) == true)
+                        return false;
+                    if (canMove(x, y, x, y - 1) == true)
+                        return false;
+                    if (canMove(x, y, x, y + 1) == true)
+                        return false;
                 }
+            }
         Debug.Log("GameOver!");
         return true;
     }
 
-    bool isGameOverSub(Vector2Int pos)
+    bool canMove(int x, int y, int dx, int dy)
     {
-        if (canMove(pos + Vector2Int.right, pos))
-            return true;
-        if (canMove(pos - Vector2Int.right, pos))
-            return true;
-        if (canMove(pos + Vector2Int.up, pos))
-            return true;
-        if (canMove(pos - Vector2Int.up, pos))
+        if (blocks[dx][dy].getNum == blocks[x][y].getNum)
             return true;
         return false;
-    }
-
-    bool canMove(Vector2Int toPos, Vector2Int fromPos)
-    {
-        Debug.Log(toPos);
-        return blocks[fromPos.x][fromPos.y] == null
-            || blocks[toPos.x][toPos.y] == null
-            || getBlock(toPos).getNum == getBlock(fromPos).getNum;
     }
 
     public void moveBlock(int dir)
@@ -147,6 +158,7 @@ public class gameField : MonoBehaviour
         if (isGoaled)
         {
             soundManager.inst.ad_goal();
+            goaled = false;
         }
     }
 

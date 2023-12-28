@@ -15,6 +15,9 @@ public class soundManager : MonoBehaviour
     [SerializeField]
     AudioClip getSound;
 
+    [SerializeField]
+    AudioClip levelSound;
+
     void Awake()
     {
         inst = this;
@@ -33,5 +36,9 @@ public class soundManager : MonoBehaviour
     public void ad_getItem()
     {
         ac.PlayOneShot(getSound);
+    }
+    public void ad_levelUp()
+    {
+        ac.PlayOneShot(levelSound);
     }
 }

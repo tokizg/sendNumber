@@ -49,6 +49,10 @@ public class gameBlock : MonoBehaviour
 
     [SerializeField]
     int lifeTime;
+    public int getLft
+    {
+        get{ return lifeTime; }
+    }
 
     [SerializeField]
     TextMeshPro numText;
