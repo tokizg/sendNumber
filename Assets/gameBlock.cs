@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using TMPro;
 
 public enum blockType
@@ -27,6 +29,9 @@ public class gameBlock : MonoBehaviour
     }
 
     [SerializeField]
+    Transform wallBlock;
+
+    [SerializeField]
     GameObject trail;
 
     [SerializeField]
@@ -51,7 +56,7 @@ public class gameBlock : MonoBehaviour
     int lifeTime;
     public int getLft
     {
-        get{ return lifeTime; }
+        get { return lifeTime; }
     }
 
     [SerializeField]
@@ -60,7 +65,7 @@ public class gameBlock : MonoBehaviour
     [SerializeField]
     TextMeshPro lftText;
 
-    public void init(int n, Vector2Int p, blockType tp, int lft)
+    public async void init(int n, Vector2Int p, blockType tp, int lft)
     {
         if (spr == null)
             spr = GetComponent<SpriteRenderer>();
@@ -73,10 +78,25 @@ public class gameBlock : MonoBehaviour
 
         color = n;
 
+        if (type == blockType.wall)
+        {
+            wallBlock.gameObject.SetActive(true);
+        }
+        else
+        {
+            wallBlock.gameObject.SetActive(false);
+        }
         Draw();
+        transform.localScale = Vector3.zero;
+        while (transform.localScale.x < 1f)
+        {
+            transform.localScale += Vector3.one * Time.deltaTime * 10f;
+            await UniTask.Yield();
+        }
+        transform.localScale = Vector3.one;
     }
 
-    public void addAge()
+    public async void addAge()
     {
         Age++;
 
@@ -88,13 +108,13 @@ public class gameBlock : MonoBehaviour
                 gameField.inst.deleteBlock(this.Position);
             }
         }
-        Draw();
+        await Draw();
     }
 
     // Start is called before the first frame update
     void Start() { }
 
-    public Vector2Int move(Vector2Int dir)
+    public async UniTask<Vector2Int> move(Vector2Int dir)
     {
         Vector2Int futurePos = Position + dir;
         if (!gameField.inst.isInside(futurePos))
@@ -103,7 +123,7 @@ public class gameBlock : MonoBehaviour
         if (futBl == null)
         {
             Position = futurePos;
-            move(dir);
+            await move(dir);
         }
         else if (
             futBl.getType == blockType.normal && futBl.getNum == this.Number && futBl.getAge > 0
@@ -129,7 +149,7 @@ public class gameBlock : MonoBehaviour
             gameField.inst.deleteBlock(futurePos);
             Position = futurePos;
         }
-        Draw();
+        await Draw();
         if (futurePos - dir != Position)
             DrawTrail(dir);
 
@@ -156,7 +176,7 @@ public class gameBlock : MonoBehaviour
     public float distance;
     public float lerpSpeed = 16f;
 
-    void Draw()
+    async UniTask Draw()
     {
         int n = Number;
         string SpriteText = Mathf.Pow(2, n).ToString();
@@ -193,6 +213,8 @@ public class gameBlock : MonoBehaviour
             lftText.text = "";
         }
         transform.position = (Vector2)Position;
+
+        return;
         /*
         if (
             Time.time - lerpStarted < distance

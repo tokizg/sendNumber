@@ -4,7 +4,6 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
 
-
 public enum mode
 {
     play,
@@ -68,14 +67,11 @@ public class game : MonoBehaviour
     void Start()
     {
         gameField.inst.init();
-        makeRandomBlock();
-        goal(0);
     }
 
     // Update is called once per frame
     void Update()
     {
-
         Vector3 mousePosition = Input.mousePosition;
         Vector2 worldPosition =
             (Vector2)Camera.main.ScreenToWorldPoint(mousePosition) + Vector2.one * 0.5f;
@@ -84,33 +80,34 @@ public class game : MonoBehaviour
         {
             case mode.play:
                 posSelector.position = Vector2.up * 100; //果ての Fry Away
-                int x_ipt = (int)Input.GetAxisRaw("Horizontal"),
-                    y_ipt = (int)Input.GetAxisRaw("Vertical"),
+                int x_ipt = (int)smartPhoneInput.Horizontal,
+                    y_ipt = (int)smartPhoneInput.Vertical,
                     dir = 0;
-                if (Input.GetButtonDown("Horizontal"))
+                if (x_ipt != 0)
                     dir = 1 * x_ipt;
-                else if (Input.GetButtonDown("Vertical"))
+                else if (y_ipt != 0)
                     dir = 2 * y_ipt;
-                else if (Input.GetButtonDown("changeSlot"))
-                {
-                    selectedSlot = Mathf.Clamp(
-                        selectedSlot + (int)Input.GetAxisRaw("changeSlot"),
-                        0,
-                        itemInventory.Count - 1
-                    );
-                }
-                else if (Input.GetButtonDown("useItem") && itemInventory.Count > 0)
-                {
-                    gameItem curItem = items[itemInventory[selectedSlot]];
-                    curItem.use();
-                    itemInventory.RemoveAt(selectedSlot);
-                    selectedSlot = Mathf.Clamp(selectedSlot, 0, itemInventory.Count - 1);
-                }
-                else if (Input.GetButtonDown("destItem") && itemInventory.Count > 0)
-                {
-                    itemInventory.RemoveAt(selectedSlot);
-                    selectedSlot = Mathf.Clamp(selectedSlot, 0, itemInventory.Count - 1);
-                }
+                /*
+            else if (Input.GetButtonDown("changeSlot"))
+            {
+                selectedSlot = Mathf.Clamp(
+                    selectedSlot + (int)Input.GetAxisRaw("changeSlot"),
+                    0,
+                    itemInventory.Count - 1
+                );
+            }
+            else if (Input.GetButtonDown("useItem") && itemInventory.Count > 0)
+            {
+                gameItem curItem = items[itemInventory[selectedSlot]];
+                curItem.use();
+                itemInventory.RemoveAt(selectedSlot);
+                selectedSlot = Mathf.Clamp(selectedSlot, 0, itemInventory.Count - 1);
+            }
+            else if (Input.GetButtonDown("destItem") && itemInventory.Count > 0)
+            {
+                itemInventory.RemoveAt(selectedSlot);
+                selectedSlot = Mathf.Clamp(selectedSlot, 0, itemInventory.Count - 1);
+            }*/
                 if (dir != 0)
                 {
                     gameField.inst.moveBlock(dir);
@@ -180,22 +177,11 @@ public class game : MonoBehaviour
         TStuck<Vector2Int> stuck = new TStuck<Vector2Int>();
         Vector2Int newBlPos;
         stuck = gameField.inst.getEmpty();
-        int k = Random.Range(0, 20);
         if (stuck.Length > 0)
         {
-            int r = Random.Range(0, stuck.Length),
-                n = Random.Range(1, 2);
+            int r = Random.Range(0, stuck.Length);
             newBlPos = stuck.get(r);
-
-            if (k > 15)
-                gameField.inst.makeBlock(
-                    Random.Range(1, 4),
-                    newBlPos,
-                    blockType.chest,
-                    Random.Range(2, 6)
-                );
-            else
-                gameField.inst.makeBlock(n, newBlPos, blockType.normal, LFT_INFINITY);
+            gameField.inst.makeBlock(1, newBlPos, blockType.normal, LFT_INFINITY);
         }
     }
 

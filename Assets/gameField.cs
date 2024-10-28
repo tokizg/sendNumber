@@ -9,7 +9,12 @@ public class gameField : MonoBehaviour
     public Vector2Int size;
     public Vector2Int goalPos;
     public Material[] colors;
-    int curLevel = 4;
+
+    [SerializeField]
+    Animator anim;
+
+    [SerializeField]
+    int curLevel = 1;
     public readonly int maxLevel = 11;
     public int getLevel
     {
@@ -22,6 +27,7 @@ public class gameField : MonoBehaviour
         {
             curLevel++;
             soundManager.inst.ad_levelUp();
+            anim.SetTrigger("level");
         }
     }
 
@@ -66,12 +72,18 @@ public class gameField : MonoBehaviour
             makeBlock(0, new Vector2Int(size.x - 1, y), blockType.wall, game.inst.LFT_INFINITY);
         }
 
-        makeGoal();
+        makeGoal(1);
+        makeBlock(1, new Vector2Int(2, 2), blockType.normal, game.inst.LFT_INFINITY);
     }
 
-    public void makeGoal()
+    public void makeGoal(int n = -1)
     {
-        ReplaceBlock(Random.Range(1, curLevel), goalPos, blockType.goal, game.inst.LFT_INFINITY);
+        ReplaceBlock(
+            n == -1 ? Random.Range(1, curLevel) : n,
+            goalPos,
+            blockType.goal,
+            game.inst.LFT_INFINITY
+        );
     }
 
     public void turnEnd()
@@ -124,7 +136,7 @@ public class gameField : MonoBehaviour
         return false;
     }
 
-    public void moveBlock(int dir)
+    public async void moveBlock(int dir)
     {
         switch (dir)
         {
@@ -162,12 +174,12 @@ public class gameField : MonoBehaviour
         }
     }
 
-    public void moveBlockSub(Vector2Int pos, Vector2Int dir)
+    public async void moveBlockSub(Vector2Int pos, Vector2Int dir)
     {
         if (blocks[pos.x][pos.y] == null || blocks[pos.x][pos.y].getType != blockType.normal)
             return;
         var curBlock = blocks[pos.x][pos.y];
-        Vector2Int newPos = curBlock.move(dir);
+        Vector2Int newPos = await curBlock.move(dir);
         if (newPos != pos)
         {
             blocks[newPos.x][newPos.y] = curBlock;
