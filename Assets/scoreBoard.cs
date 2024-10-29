@@ -12,6 +12,7 @@ public class scoreBoard : MonoBehaviour
 
     [SerializeField]
     GameObject overMenu;
+
     [SerializeField]
     TMP_Text scTx;
 
@@ -23,7 +24,7 @@ public class scoreBoard : MonoBehaviour
     public void Over()
     {
         overMenu.SetActive(true);
-        scTx.text = "スコア: " + game.inst.getScore.ToString();
+        scTx.text = "スコア: " + SPM.convSpr(game.inst.getScore.ToString());
     }
 
     public void Draw()

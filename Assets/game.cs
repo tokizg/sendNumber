@@ -4,6 +4,8 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
 
+//using unityroom.Api;
+
 public enum mode
 {
     play,
@@ -47,6 +49,8 @@ public class game : MonoBehaviour
 
     [SerializeField]
     TextMeshPro itemDesc;
+
+    public bool Goaled = false;
 
     public mode curMode = mode.play;
 
@@ -149,11 +153,12 @@ public class game : MonoBehaviour
                 }
                 break;
             case mode.over:
-                if (Input.GetButtonDown("Reset"))
+                if (smartPhoneInput.ResetButtonDown)
                     SceneManager.LoadScene(0);
                 break;
         }
         DrawInv();
+        Goaled = false;
         return;
     }
 
@@ -161,6 +166,7 @@ public class game : MonoBehaviour
     {
         curMode = mode.over;
         scoreBoard.inst.Over();
+        //UnityroomApiClient.Instance.SendScore(1, score, ScoreboardWriteMode.HighScoreDesc);
     }
 
     public void openChest()
@@ -191,7 +197,7 @@ public class game : MonoBehaviour
             score += sc_Power(n);
         gameField.inst.makeGoal();
         scoreBoard.inst.Draw();
-        if (score > sc_Power(gameField.inst.getLevel))
+        if (score > sc_Power(gameField.inst.getLevel + 1))
             gameField.inst.levelUp();
     }
 
@@ -222,7 +228,6 @@ public class game : MonoBehaviour
     int sc_Power(int n)
     {
         int ret = sc_PowerSub(n, 1);
-        Debug.Log(ret);
         return ret;
     }
 
@@ -231,66 +236,5 @@ public class game : MonoBehaviour
         if (n == 0)
             return x;
         return sc_PowerSub(n - 1, x * ((n % 2 == 0) ? 2 : 3));
-    }
-}
-
-public class TStuck<T>
-{
-    T[] elt;
-
-    public TStuck()
-    {
-        elt = new T[0];
-    }
-
-    public void push(T addElt)
-    {
-        T[] newElts = new T[elt.Length + 1];
-        for (int i = 0; i < elt.Length; i++)
-            newElts[i] = elt[i];
-        newElts[newElts.Length - 1] = addElt;
-        elt = newElts;
-    }
-
-    public T get(int idx)
-    {
-        return elt[idx];
-    }
-
-    public int Length
-    {
-        get { return elt.Length; }
-    }
-
-    public void dispTStuck()
-    {
-        Debug.Log("--- Display Elements:");
-
-        for (int i = 0; i < elt.Length; i++)
-            Debug.Log(elt[i]);
-
-        Debug.Log("END --- ");
-    }
-}
-
-public class SPM
-{
-    public static string convSpr(string str)
-    {
-        string ret = "";
-        for (int i = 0; i <= str.Length - 1; i++)
-        {
-            switch (str[i])
-            {
-                case ' ':
-                    ret += " ";
-                    break;
-                default:
-                    ret += "<sprite=" + (System.Convert.ToInt32(str[i]) - 48) + ">";
-
-                    break;
-            }
-        }
-        return ret;
     }
 }

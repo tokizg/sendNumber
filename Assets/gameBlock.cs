@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using TMPro;
 
@@ -133,7 +130,11 @@ public class gameBlock : MonoBehaviour
             gameField.inst.deleteBlock(futurePos);
             Position = futurePos;
         }
-        else if (futBl.getType == blockType.goal && futBl.getNum == this.Number)
+        else if (
+            futBl.getType == blockType.goal
+            && futBl.getNum == this.Number
+            && !gameField.inst.isGoaled
+        )
         {
             gameField.inst.deleteBlock(futurePos);
             Position = futurePos;
@@ -194,7 +195,7 @@ public class gameBlock : MonoBehaviour
                 break;
             case blockType.chest:
                 spr.sprite = game.inst.blockSpr[4];
-                numText.text = SPM.convSpr(Mathf.Pow(2, n).ToString());
+                numText.text = Mathf.Pow(2, n).ToString();
                 this.spr.material = gameField.inst.colors[8];
                 break;
             case blockType.stopper:
@@ -206,7 +207,7 @@ public class gameBlock : MonoBehaviour
         }
         if (lifeTime != -1)
         {
-            lftText.text = SPM.convSpr(lifeTime.ToString());
+            lftText.text = lifeTime.ToString();
         }
         else
         {

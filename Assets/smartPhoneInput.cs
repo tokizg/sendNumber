@@ -5,6 +5,17 @@ public class smartPhoneInput : MonoBehaviour
     private Vector2 fingerDown;
     private Vector2 fingerUp;
 
+    static bool resetButtonDown;
+    public static bool ResetButtonDown
+    {
+        get
+        {
+            bool val = resetButtonDown;
+            resetButtonDown = false;
+            return val;
+        }
+    }
+
     static float horizontalVal;
     public static float Horizontal
     {
@@ -60,20 +71,12 @@ public class smartPhoneInput : MonoBehaviour
             }
         }
 
-        if (
-            Input.GetButtonDown("Horizontal")
-            || Input.GetButton("Vertical")
-            || Input.GetButtonUp("Horizontal")
-        )
+        if (Input.GetButtonDown("Horizontal"))
         {
             horizontalVal = Input.GetAxisRaw("Horizontal");
         }
 
-        if (
-            Input.GetButtonDown("Vertical")
-            || Input.GetButton("Vertical")
-            || Input.GetButtonUp("Vertical")
-        )
+        if (Input.GetButtonDown("Vertical"))
         {
             verticalVal = Input.GetAxisRaw("Vertical");
         }
@@ -137,5 +140,10 @@ public class smartPhoneInput : MonoBehaviour
     void OnSwipeRight()
     {
         horizontalVal = 1;
+    }
+
+    public void ResetButton()
+    {
+        resetButtonDown = true;
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class gameField : MonoBehaviour
@@ -9,6 +10,9 @@ public class gameField : MonoBehaviour
     public Vector2Int size;
     public Vector2Int goalPos;
     public Material[] colors;
+
+    [SerializeField]
+    TMP_Text levelText;
 
     [SerializeField]
     Animator anim;
@@ -27,6 +31,7 @@ public class gameField : MonoBehaviour
         {
             curLevel++;
             soundManager.inst.ad_levelUp();
+            levelText.text = "レベル: " + SPM.convSpr(curLevel.ToString());
             anim.SetTrigger("level");
         }
     }
@@ -79,7 +84,7 @@ public class gameField : MonoBehaviour
     public void makeGoal(int n = -1)
     {
         ReplaceBlock(
-            n == -1 ? Random.Range(1, curLevel) : n,
+            n == -1 ? Random.Range(1, curLevel + 2) : n,
             goalPos,
             blockType.goal,
             game.inst.LFT_INFINITY
@@ -106,10 +111,8 @@ public class gameField : MonoBehaviour
     public bool isGameOver()
     {
         var empties = getEmpty();
-        Debug.Log(empties.Length);
         if (empties.Length > 0)
             return false;
-        Debug.Log("theres no empty");
         for (int x = 1; x < blocks.Length - 1; x++)
             for (int y = 1; y < blocks[x].Length - 1; y++)
             {
@@ -125,7 +128,6 @@ public class gameField : MonoBehaviour
                         return false;
                 }
             }
-        Debug.Log("GameOver!");
         return true;
     }
 
